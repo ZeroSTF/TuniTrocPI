@@ -5,10 +5,11 @@
  */
 package controller;
 
+import com.itextpdf.text.BaseColor;
 import entities.Echange;
-import entities.Evenement;
 import entities.User;
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -39,8 +40,23 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import services.CRUDEchange;
-import services.CRUDEvenement;
 import services.CRUDUser;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Font.FontFamily;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.awt.Desktop;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import utils.DBConnection;
 
 /**
  * FXML Controller class
@@ -82,6 +98,8 @@ public class TableEchangeController implements Initializable {
 
     @FXML
     private Button btn_users;
+    @FXML
+    private Button btn_pdf;
 
     @FXML
     private Button btn_events;
@@ -91,6 +109,9 @@ public class TableEchangeController implements Initializable {
 
     @FXML
     private Button btn_transporteurs;
+    
+    @FXML
+    private Button btn_archive;
 
     @FXML
     private TableView<Echange> table_echanges;
@@ -153,6 +174,9 @@ public class TableEchangeController implements Initializable {
         }
     }
 
+   
+    
+    
     @FXML
     void click_disconnect(MouseEvent event) throws SQLException {
         CRUDUser sa = new CRUDUser();
@@ -223,41 +247,55 @@ public class TableEchangeController implements Initializable {
 
     @FXML
     void click_modif(MouseEvent event) {
-        ModifEchangeController ctrl = new ModifEchangeController();
-        ctrl.setI(i);
+       // ModifEchangeController ctrl = new ModifEchangeController();
+       // ctrl.setI(i);
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GUI/ModifEchange.fxml"));
+        Echange selectedEchange = table_echanges.getSelectionModel().getSelectedItem();
+        if (selectedEchange == null) {
+            // Aucun evenement sélectionné, afficher un message d'avertissement
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Aucun échange sélectionné");
+            alert.setHeaderText(null);
+            alert.setContentText("Veuillez sélectionner un échange à modifier.");
+            alert.showAndWait();
+        } else {
+            ModifEchangeController modifechangecontroller = new ModifEchangeController();
+            modifechangecontroller.setI(i);
+            modifechangecontroller.setEchange_e(selectedEchange);
 
-            // set the controller instance
-            loader.setController(ctrl);
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/GUI/ModifEchange.fxml"));
 
-            Parent root = loader.load();
+                // set the controller instance
+                loader.setController(modifechangecontroller);
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                Parent root = loader.load();
 
-            Scene scene = new Scene(root);
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-            stage.setScene(scene);
-            stage.setOnCloseRequest(e -> {
+                Scene scene = new Scene(root);
+
+                stage.setScene(scene);
+                stage.setOnCloseRequest(e -> {
                 
                 try {
                     CRUDUser cr7=new CRUDUser();
-                    cr7.logout(currentUser.getEmail()); 
+                    cr7.logout(currentUser.getEmail()); // Appelle la fonction supp()
                 } catch (SQLException ex) {
                     Logger.getLogger(TableUserController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
-            stage.show();
+                stage.show();
 
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
         }
+
     }
 
     @FXML
     void click_supp(MouseEvent event) {
-        // Récupération de l'utilisateur sélectionné
         Echange selectedEchange = table_echanges.getSelectionModel().getSelectedItem();
         if (selectedEchange == null) {
             // Aucun utilisateur sélectionné, afficher un message d'avertissement
@@ -336,48 +374,151 @@ public class TableEchangeController implements Initializable {
             btn.setStyle("-fx-background-color: rgb(252, 215, 69); -fx-text-fill: white;");
 
     }
+    @FXML
+ void archive(MouseEvent event) throws IOException {
+    Parent archiveParent = FXMLLoader.load(getClass().getResource("/GUI/TableArchive.fxml"));
+    Scene archiveScene = new Scene(archiveParent);
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        try {
-            currentUser=cr7.getUserById(i);
-        } catch (SQLException ex) {
-            Logger.getLogger(AjoutEventController.class.getName()).log(Level.SEVERE, null, ex);
+    Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    window.setScene(archiveScene);
+    window.show();
+}
+
+
+ @FXML
+void PDF(MouseEvent event) {
+    Connection TuniTrocDB = DBConnection.getConnection();
+    try {
+        Document document = new Document();
+        PdfWriter.getInstance(document, new FileOutputStream("C:/Users/azizn/OneDrive/Documents/pdfs/pdfEchange.pdf"));
+        document.open();
+
+        // Add the title to the document
+        Paragraph title = new Paragraph("Liste des échanges", new Font(FontFamily.HELVETICA, 14, Font.BOLDITALIC, BaseColor.RED));
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+
+        // Add some spacing between the title and the table
+        document.add(new Paragraph(" "));
+
+        // Create a table with four columns
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+
+        // Add column headers to the table
+        PdfPCell cellId = new PdfPCell(new Phrase("ID", new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED)));
+        PdfPCell cellEtat = new PdfPCell(new Phrase("Etat", new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED)));
+        PdfPCell cellIdPanier = new PdfPCell(new Phrase("ID Panier", new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED)));
+        PdfPCell cellTransporteur = new PdfPCell(new Phrase("Transporteur", new Font(FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED)));
+
+        table.addCell(cellId);
+        table.addCell(cellEtat);
+        table.addCell(cellIdPanier);
+        table.addCell(cellTransporteur);
+
+        // Retrieve data from the database
+        Statement stmt = TuniTrocDB.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM echange");
+
+        // Loop through the data and add it to the table
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String etat = rs.getString("etat");
+            int id_panier = rs.getInt("id_panier");
+            int transporteur = rs.getInt("id_transporteur");
+
+            // Add data to the table
+            table.addCell(new PdfPCell(new Phrase(String.valueOf(id))));
+            table.addCell(new PdfPCell(new Phrase(etat)));
+            table.addCell(new PdfPCell(new Phrase(String.valueOf(id_panier))));
+            table.addCell(new PdfPCell(new Phrase(String.valueOf(transporteur))));
         }
-        label_nomUser.setText(currentUser.getPrenom() + " " + currentUser.getNom());
-        InputStream inputStream = new ByteArrayInputStream(currentUser.getPhoto());
-        Image image = new Image(inputStream);
-        img_user.setImage(image);
-        img_user.setPreserveRatio(true);
 
-        CRUDEchange sa = new CRUDEchange();
+        // Add the table to the document
+        document.add(table);
 
-        List<Echange> echangesListFromDatabase = null;
-        try {
-            echangesListFromDatabase = sa.afficherEchanges();
-        } catch (SQLException ex) {
-            Logger.getLogger(TableEventController.class.getName()).log(Level.SEVERE, null, ex);
+        document.close();
+
+        // Open the PDF file
+        File file = new File("C:/Users/azizn/OneDrive/Documents/pdfs/pdfEchange.pdf");
+        if (file.exists()) {
+            if (Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().open(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Desktop is not supported");
+            }
+        } else {
+            System.out.println("File does not exist");
         }
-        ObservableList<Echange> echList = FXCollections.observableArrayList();
-        echList.addAll(echangesListFromDatabase);
-
-        id_echange.setCellValueFactory(new PropertyValueFactory<>("id"));
-        panier_echange.setCellValueFactory(new PropertyValueFactory<>("id_panier"));
-        etat_echange.setCellValueFactory(new PropertyValueFactory<>("etat"));
-        transp_echange.setCellValueFactory(new PropertyValueFactory<>("id_transporteur"));
-
-        table_echanges.setItems(echList);
-        
-//        //RECHERCHE//////////////////////////
-//        // Set up search box listener
-//        searchBox.textProperty().addListener((observable, oldValue, newValue) -> {
-//            try {
-//                eventList.clear();
-//                eventList.addAll(sa.recherche(newValue));
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        });
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
+
+  
+    
+    
+    
+    
+    
+   @Override
+public void initialize(URL location, ResourceBundle resources) {
+    try {
+        currentUser = cr7.getUserById(i);
+    } catch (SQLException ex) {
+        Logger.getLogger(AjoutEventController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    label_nomUser.setText(currentUser.getPrenom() + " " + currentUser.getNom());
+    InputStream inputStream = new ByteArrayInputStream(currentUser.getPhoto());
+    Image image = new Image(inputStream);
+    img_user.setImage(image);
+    img_user.setPreserveRatio(true);
+
+    CRUDEchange sa = new CRUDEchange();
+
+    List<Echange> echangesListFromDatabase = null;
+    try {
+        echangesListFromDatabase = sa.afficherEchanges();
+    } catch (SQLException ex) {
+        Logger.getLogger(TableEchangeController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    ObservableList<Echange> echList = FXCollections.observableArrayList();
+    echList.addAll(echangesListFromDatabase);
+
+    id_echange.setCellValueFactory(new PropertyValueFactory<>("id"));
+    panier_echange.setCellValueFactory(new PropertyValueFactory<>("id_panier"));
+    etat_echange.setCellValueFactory(new PropertyValueFactory<>("etat"));
+    transp_echange.setCellValueFactory(new PropertyValueFactory<>("id_transporteur"));
+
+    table_echanges.setItems(echList);
+
+    // Add listener to the search box
+    searchBox.textProperty().addListener((observable, oldValue, newValue) -> {
+        if (newValue.trim().isEmpty()) { // Show all echanges if search box is empty
+            echList.clear();
+            try {
+                echList.addAll(sa.afficherEchanges());
+            } catch (SQLException ex) {
+                Logger.getLogger(TableEchangeController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else { // Call recherche method to show filtered echanges
+            int id_e = Integer.parseInt(newValue);
+            List<Echange> filteredList = null;
+            try {
+                filteredList = sa.recherche(id_e);
+            } catch (SQLException ex) {
+                Logger.getLogger(TableEchangeController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            echList.clear();
+            echList.addAll(filteredList);
+        }
+    });
+}
 
 }
