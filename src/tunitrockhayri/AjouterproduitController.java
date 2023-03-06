@@ -5,7 +5,7 @@
  */
 package tunitrockhayri;
 
-import crud.ProduitCrud;
+import services.ProduitCrud;
 import entities.Produit;
 import java.io.File;
 import java.io.IOException;

@@ -69,7 +69,7 @@
                   <FontAwesomeIconView fill="WHITE" glyphName="SHOPPING_BASKET" size="20" />
                </graphic>
             </Button>
-            <Button alignment="TOP_LEFT" layoutY="376.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="300.0" style="-fx-background-color: #fcd745;" text="Posts" textFill="WHITE">
+            <Button fx:id="btn_post" alignment="TOP_LEFT" layoutY="376.0" mnemonicParsing="false" onAction="#click_post" prefHeight="30.0" prefWidth="300.0" style="-fx-background-color: #fcd745;" text="Posts" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="18.0" />
                </font>

@@ -17,17 +17,39 @@ public class Post {
     private String contenu;
     private LocalDateTime date;
     private int id_user;
+    private int likes;
+    private int dislikes;
 
     public Post() {
     }
 
-    public Post(int id, String titre, String contenu, LocalDateTime date, int id_user) {
+    public Post(int id, String titre, String contenu, LocalDateTime date, int id_user,int likes,int dislikes) {
         this.id = id;
         this.titre = titre;
         this.contenu = contenu;
         this.date = date;
         this.id_user = id_user;
+        this.likes=likes;
+        this.dislikes=dislikes;
     }
+    
+    
+    
+    public Post( String titre, String contenu,LocalDateTime date, int id_user,int likes,int dislikes) {
+        
+        
+        this.titre = titre;
+        this.contenu = contenu;
+         this.date=date;
+        this.id_user = id_user;
+        this.likes=likes;
+        this.dislikes=dislikes;
+    }
+
+    
+    
+    
+
 
     public int getId() {
         return id;
@@ -69,9 +91,29 @@ public class Post {
         this.id_user = id_user;
     }
 
+    public int getLike() {
+        return likes;
+    }
+
+    public void setLike(int likes) {
+        this.likes = likes;
+    }
+
+    public int getDislike() {
+        return dislikes;
+    }
+
+    public void setDislike(int dislikes) {
+        this.dislikes = dislikes;
+    }
+
     @Override
     public String toString() {
-        return "Post{" + "id=" + id + ", titre=" + titre + ", contenu=" + contenu + ", date=" + date + ", id_user=" + id_user + '}';
+        return "Post{" + "id=" + id + ", titre=" + titre + ", contenu=" + contenu + ", date=" + date + ", id_user=" + id_user + ", likes=" + likes + ", dislikes=" + dislikes + '}';
     }
     
+    
+    
+    
+
 }

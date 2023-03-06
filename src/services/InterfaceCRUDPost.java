@@ -21,4 +21,9 @@ public interface InterfaceCRUDPost {
     public void supprimerPost(int id) throws SQLException;
 
     public List<Post> afficherPosts() throws SQLException;
+    
+    List<Post> getPosts() throws SQLException;
+    
+    
+    public List<Post> chercherPostsParTitre(String titre) throws SQLException;
 }

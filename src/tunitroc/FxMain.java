@@ -1,4 +1,4 @@
-/*
+ /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -6,6 +6,7 @@
 package tunitroc;
 
 import controller.LoginUIController;
+import controller.TablePostController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,9 @@ public class FxMain extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         LoginUIController c = new LoginUIController();
+              // TablePostController c = new TablePostController();
+
+       
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/GUI/LoginUI.fxml"));
             loader.setController(c);

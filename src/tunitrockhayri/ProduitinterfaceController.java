@@ -5,7 +5,7 @@
  */
 package tunitrockhayri;
 
-import crud.ProduitCrud;
+import services.ProduitCrud;
 import entities.Produit;
 import java.awt.Button;
 import java.awt.TextField;

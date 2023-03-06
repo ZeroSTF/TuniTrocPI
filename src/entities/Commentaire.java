@@ -16,18 +16,58 @@ public class Commentaire {
     private String contenu;
     private LocalDateTime date;
     private int id_post;
+    private int like;
+    private int dislike;
     private int id_user;
 
     public Commentaire() {
     }
 
-    public Commentaire(int id, String contenu, LocalDateTime date, int id_post, int id_user) {
+    public Commentaire(int id, String contenu, LocalDateTime date, int id_post,  int id_user,int like, int dislike) {
         this.id = id;
         this.contenu = contenu;
         this.date = date;
         this.id_post = id_post;
+        this.like = like;
+        this.dislike = dislike;
         this.id_user = id_user;
     }
+
+    public Commentaire(String contenu, LocalDateTime date, int id_post, int id_user ,int like, int dislike) {
+         this.contenu = contenu;
+        this.date = date;
+        this.id_post = id_post;
+        this.like = like;
+        this.dislike = dislike;
+        this.id_user = id_user;
+    }
+    
+     public Commentaire(int id,String contenu ,LocalDateTime date,int id_post,int id_user){
+         this.contenu = contenu;
+        this.date = date;
+        this.id_post = id_post;
+        this.id_user = id_user;
+     }
+
+    
+    
+    public int getLike() {
+        return like;
+    }
+
+    public void setLike(int like) {
+        this.like = like;
+    }
+
+    public int getDislike() {
+        return dislike;
+    }
+
+    public void setDislike(int dislike) {
+        this.dislike = dislike;
+    }
+
+   
 
     public int getId() {
         return id;

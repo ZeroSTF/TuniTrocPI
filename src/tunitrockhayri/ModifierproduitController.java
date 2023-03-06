@@ -5,7 +5,7 @@
  */
 package tunitrockhayri;
 import javafx.scene.input.MouseEvent;
-import crud.ProduitCrud;
+import services.ProduitCrud;
 import entities.Produit;
 import java.io.IOException;
 import java.net.URL;
